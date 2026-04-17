@@ -1,5 +1,7 @@
 /** @type {import('next').NextConfig} */
 /* eslint-disable @typescript-eslint/no-var-requires */
+
+// 判断是否为静态导出（用于打包 APK/App）
 const isStaticExport =
   process.env.NEXT_OUTPUT === 'export' ||
   process.env.NEXT_PUBLIC_OUTPUT === 'export' ||
@@ -12,6 +14,8 @@ const nextConfig = {
 
   reactStrictMode: false,
   swcMinify: true,
+  
+  // 根据环境决定输出模式
   ...(isStaticExport ? {} : { output: 'standalone' }),
   ...(isStaticExport
     ? {
@@ -19,9 +23,24 @@ const nextConfig = {
         trailingSlash: true,
       }
     : {}),
+    
   allowedDevOrigins: ['45.142.166.74'],
 
-  // Uncoment to add domain whitelist
+  // --- Vercel 反向代理配置 ---
+  async rewrites() {
+    // 如果是打包 App 模式，不使用代理（App 原生环境支持 HTTP）
+    if (isStaticExport) return [];
+
+    return [
+      {
+        // 这是一个通用的代理规则
+        // 以后你在 JSON 里把 http://caiji.dyttzyapi.com/ 换成 /api/proxy/ 即可
+        source: '/api/proxy/:path*',
+        destination: 'http://caiji.dyttzyapi.com/:path*', 
+      },
+    ];
+  },
+
   images: {
     unoptimized: true,
     remotePatterns: [
@@ -37,23 +56,20 @@ const nextConfig = {
   },
 
   webpack(config) {
-    // Grab the existing rule that handles SVG imports
     const fileLoaderRule = config.module.rules.find((rule) =>
       rule.test?.test?.('.svg')
     );
 
     config.module.rules.push(
-      // Reapply the existing rule, but only for svg imports ending in ?url
       {
         ...fileLoaderRule,
         test: /\.svg$/i,
-        resourceQuery: /url/, // *.svg?url
+        resourceQuery: /url/, 
       },
-      // Convert all other *.svg imports to React components
       {
         test: /\.svg$/i,
         issuer: { not: /\.(css|scss|sass)$/ },
-        resourceQuery: { not: /url/ }, // exclude if *.svg?url
+        resourceQuery: { not: /url/ }, 
         loader: '@svgr/webpack',
         options: {
           dimensions: false,
@@ -62,7 +78,6 @@ const nextConfig = {
       }
     );
 
-    // Modify the file loader rule to ignore *.svg, since we have it handled now.
     fileLoaderRule.exclude = /\.svg$/i;
 
     config.resolve.fallback = {
@@ -76,9 +91,10 @@ const nextConfig = {
   },
 };
 
+// PWA 配置
 const withPWA = require('next-pwa')({
   dest: 'public',
-  disable: process.env.NODE_ENV === 'development' || nextConfig.output === 'export',
+  disable: process.env.NODE_ENV === 'development' || isStaticExport,
   register: true,
   skipWaiting: true,
 });
