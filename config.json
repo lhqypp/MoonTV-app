@@ -2,7 +2,7 @@
   "cache_time": 7200,
   "api_site": {
     "dyttzy": {
-      "api": "http://caiji.dyttzyapi.com/api.php/provide/vod",
+      "api": "https://caiji.dyttzyapi.com/api.php/provide/vod",
       "name": "电影天堂资源",
       "detail": "http://caiji.dyttzyapi.com"
     },
@@ -103,7 +103,7 @@
       {
         "key": "dyttzy",
         "name": "电影天堂资源",
-        "api": "http://caiji.dyttzyapi.com/api.php/provide/vod",
+        "api": "https://caiji.dyttzyapi.com/api.php/provide/vod",
         "detail": "http://caiji.dyttzyapi.com",
         "from": "config",
         "disabled": false
