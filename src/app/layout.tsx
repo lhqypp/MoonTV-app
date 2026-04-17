@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
+import { Analytics } from '@vercel/analytics/next';
 
 import './globals.css';
 import 'sweetalert2/dist/sweetalert2.min.css';
@@ -94,6 +95,7 @@ export default async function RootLayout({
             {children}
           </SiteProvider>
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
